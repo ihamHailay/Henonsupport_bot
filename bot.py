@@ -1,7 +1,5 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request
-from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -9,29 +7,27 @@ from telegram.ext import (
     ConversationHandler,
     filters,
 )
-
-# Import your handlers
 from handlers.language import start, chosen, LANG
 from handlers.menu     import main_menu, choice, MENU
 from handlers.report   import REPORT, handle_report
 from handlers.solve    import SOLVE, handle_solve
 
-# 1) Load environment
+# 1) Load .env
 load_dotenv()
-TOKEN    = os.getenv("BOT_TOKEN")
-OP_CHAT  = os.getenv("OPERATOR_CHAT_ID")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # e.g. https://your-service.onrender.com
+TOKEN   = os.getenv("BOT_TOKEN")
+OP_CHAT = os.getenv("OPERATOR_CHAT_ID")
+print("Loaded operator ID:", OP_CHAT)  # Add this line after loading .env
 
-if not TOKEN or not WEBHOOK_URL:
-    raise RuntimeError("BOT_TOKEN and WEBHOOK_URL must be set in .env")
+if not TOKEN:
+    raise RuntimeError("BOT_TOKEN is not set in .env")
 
-# 2) Build the Telegram application
-telegram_app = ApplicationBuilder().token(TOKEN).build()
+# 2) Build the Application once
+app = ApplicationBuilder().token(TOKEN).build()
 
-# Make OPERATOR_CHAT_ID available to handlers
-telegram_app.bot_data["OPERATOR_CHAT_ID"] = OP_CHAT
+# 3) Make OPERATOR_CHAT_ID available to handlers
+app.bot_data["OPERATOR_CHAT_ID"] = OP_CHAT
 
-# 3) Set up your ConversationHandler
+# 4) Create your ConversationHandler
 conv = ConversationHandler(
     entry_points=[CommandHandler("start", start)],
     states={
@@ -45,24 +41,11 @@ conv = ConversationHandler(
         text="Operation cancelled."
     ))],
 )
-telegram_app.add_handler(conv)
 
-# 4) Create a minimal Flask app to receive webhooks
-app = Flask(__name__)
+# 5) Register the handler
+app.add_handler(conv)
 
-@app.route(f"/{TOKEN}", methods=["POST"])
-def webhook_handler():
-    data = request.get_json(force=True)
-    update = Update.de_json(data, telegram_app.bot)
-    telegram_app.process_update(update)
-    return "OK"
-
+# 6) Run polling (sync)
 if __name__ == "__main__":
-    # 5) Start webhook listener and register with Telegram
-    #    Listen on 0.0.0.0:8443 and tell Telegram to post updates here:
-    webhook_path = f"/{TOKEN}"
-    print("Starting Flask server and setting webhook to", WEBHOOK_URL + webhook_path)
-    # Set the webhook with Telegram
-    telegram_app.bot.set_webhook(url=WEBHOOK_URL + webhook_path)
-    # Run Flask
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8443)))
+    print("Bot is up and running—send /start in Telegram to test.")
+    app.run_polling()
