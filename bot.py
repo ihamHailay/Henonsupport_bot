@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -13,7 +13,7 @@ from handlers.report   import REPORT, handle_report
 from handlers.solve    import SOLVE, handle_solve
 
 # 1) Load .env
-load_dotenv()
+# load_dotenv()
 TOKEN   = os.getenv("BOT_TOKEN")
 OP_CHAT = os.getenv("OPERATOR_CHAT_ID")
 print("Loaded operator ID:", OP_CHAT)  # Add this line after loading .env
