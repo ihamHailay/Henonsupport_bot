@@ -1,8 +1,8 @@
-from telegram import Update
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 from .utils import main_menu_keyboard
 from .report import REPORT
-from .solve import SOLVE
+from .solve import SOLVE, COMMON_ISSUES
 
 MENU = 1
 
@@ -19,18 +19,36 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
+
     if text == '1':
-        await update.message.reply_text("Please describe the issue you want to report:")
-        return REPORT  # Waits for user input, handled in report.py
+        await update.message.reply_text(
+            "Please describe the issue you want to report:"
+        )
+        return REPORT
+
     if text == '2':
-        await update.message.reply_text("Please describe the problem you want help solving:")
+        # Show the keyboard of common issues and go to SOLVE
+        kb = ReplyKeyboardMarkup(
+            [[issue] for issue in COMMON_ISSUES],
+            one_time_keyboard=True
+        )
+        await update.message.reply_text(
+            "Choose your problem:", reply_markup=kb
+        )
         return SOLVE
+
     if text == '3':
-        await update.message.reply_text("User manual: https://example.com/manual")
-        return ConversationHandler.END
-    if text == '4':
-        await update.message.reply_text("Video manual: https://example.com/video")
+        await update.message.reply_text(
+            "User manual: https://example.com/manual"
+        )
         return ConversationHandler.END
 
+    if text == '4':
+        await update.message.reply_text(
+            "Video manual: https://example.com/video"
+        )
+        return ConversationHandler.END
+
+    # Invalid choice
     await update.message.reply_text("Please choose 1–4.")
     return MENU
