@@ -1,5 +1,5 @@
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -12,19 +12,20 @@ from handlers.menu     import main_menu, choice, MENU
 from handlers.report   import REPORT, handle_report
 from handlers.solve    import SOLVE, handle_solve
 
-# 1) Load environment variables from Render's dashboard
-# load_dotenv() # <-- This line should be removed or commented out
-TOKEN      = os.getenv("BOT_TOKEN")
-OP_CHAT    = os.getenv("OPERATOR_CHAT_ID")
+# Load .env
+load_dotenv()
+TOKEN         = os.getenv("BOT_TOKEN")
+OP_CHAT       = os.getenv("OPERATOR_CHAT_ID")
+WEBHOOK_URL   = os.getenv("WEBHOOK_URL")  # e.g. https://your-render-url.com
 
-if not (TOKEN and OP_CHAT):
-    raise RuntimeError("BOT_TOKEN and OPERATOR_CHAT_ID must be set in Render's environment variables")
+if not (TOKEN and OP_CHAT and WEBHOOK_URL):
+    raise RuntimeError("BOT_TOKEN, OPERATOR_CHAT_ID, WEBHOOK_URL must be set")
 
-# 2) Build the bot application
+# Build the bot application
 app = ApplicationBuilder().token(TOKEN).build()
 app.bot_data["OPERATOR_CHAT_ID"] = OP_CHAT
 
-# 3) ConversationHandler setup
+# Register your ConversationHandler, as before
 conv = ConversationHandler(
     entry_points=[CommandHandler("start", start)],
     states={
@@ -33,13 +34,23 @@ conv = ConversationHandler(
         REPORT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_report)],
         SOLVE:  [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_solve)],
     },
-    fallbacks=[CommandHandler("cancel", lambda u, c: c.bot.send_message(
-        chat_id=u.effective_chat.id, text="Operation cancelled."
+    fallbacks=[CommandHandler("cancel", lambda u,c: c.bot.send_message(
+        chat_id=u.effective_chat.id,
+        text="Operation cancelled."
     ))],
 )
 app.add_handler(conv)
 
-# 4) Run polling
 if __name__ == "__main__":
-    print("Starting bot polling...")
-    app.run_polling()
+    # Use the PORT Render assigns (default 10000 or $PORT)
+    port = int(os.environ.get("PORT", "10000"))
+    # The path Telegram will post to must exactly match TOKEN
+    path = f"/{TOKEN}"
+    # Start webhook (this sets Telegram’s webhook under the hood)
+    print(f"Starting webhook on port {port}, URL {WEBHOOK_URL}{path}")
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=port,
+        url_path=TOKEN,
+        webhook_url=f"{WEBHOOK_URL}{path}"
+    )
