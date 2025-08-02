@@ -1,5 +1,5 @@
 import os
-# from dotenv import load_dotenv # <-- Comment this line out
+# from dotenv import load_dotenv
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -12,13 +12,13 @@ from handlers.menu     import main_menu, choice, MENU
 from handlers.report   import REPORT, handle_report
 from handlers.solve    import SOLVE, handle_solve
 
-# 1) Load environment
-load_dotenv()
+# 1) Load environment variables from Render's dashboard
+# load_dotenv() # <-- This line should be removed or commented out
 TOKEN      = os.getenv("BOT_TOKEN")
 OP_CHAT    = os.getenv("OPERATOR_CHAT_ID")
 
 if not (TOKEN and OP_CHAT):
-    raise RuntimeError("BOT_TOKEN and OPERATOR_CHAT_ID must be set in .env")
+    raise RuntimeError("BOT_TOKEN and OPERATOR_CHAT_ID must be set in Render's environment variables")
 
 # 2) Build the bot application
 app = ApplicationBuilder().token(TOKEN).build()
@@ -39,8 +39,7 @@ conv = ConversationHandler(
 )
 app.add_handler(conv)
 
-# 4) Run polling (sync) so Render sees the port open
+# 4) Run polling
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8443))
-    print(f"Starting polling. (Render health-check will see this process bound.)")
+    print("Starting bot polling...")
     app.run_polling()
