@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -13,7 +12,7 @@ from handlers.report   import REPORT, handle_report
 from handlers.solve    import SOLVE, handle_solve
 
 # Load .env
-load_dotenv()
+
 TOKEN         = os.getenv("BOT_TOKEN")
 OP_CHAT       = os.getenv("OPERATOR_CHAT_ID")
 WEBHOOK_URL   = os.getenv("WEBHOOK_URL")  # e.g. https://your-render-url.com
