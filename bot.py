@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv # <-- Comment this line out
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,

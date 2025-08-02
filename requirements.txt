@@ -1,2 +1,2 @@
 python-telegram-bot>=20.0
-python-dotenv
+# python-dotenv # <-- Comment this line out or delete it
