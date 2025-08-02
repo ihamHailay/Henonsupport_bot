@@ -12,22 +12,19 @@ from handlers.menu     import main_menu, choice, MENU
 from handlers.report   import REPORT, handle_report
 from handlers.solve    import SOLVE, handle_solve
 
-# 1) Load .env
+# 1) Load environment
 load_dotenv()
-TOKEN   = os.getenv("BOT_TOKEN")
-OP_CHAT = os.getenv("OPERATOR_CHAT_ID")
-print("Loaded operator ID:", OP_CHAT)  # Add this line after loading .env
+TOKEN      = os.getenv("BOT_TOKEN")
+OP_CHAT    = os.getenv("OPERATOR_CHAT_ID")
 
-if not TOKEN:
-    raise RuntimeError("BOT_TOKEN is not set in .env")
+if not (TOKEN and OP_CHAT):
+    raise RuntimeError("BOT_TOKEN and OPERATOR_CHAT_ID must be set in .env")
 
-# 2) Build the Application once
+# 2) Build the bot application
 app = ApplicationBuilder().token(TOKEN).build()
-
-# 3) Make OPERATOR_CHAT_ID available to handlers
 app.bot_data["OPERATOR_CHAT_ID"] = OP_CHAT
 
-# 4) Create your ConversationHandler
+# 3) ConversationHandler setup
 conv = ConversationHandler(
     entry_points=[CommandHandler("start", start)],
     states={
@@ -36,16 +33,14 @@ conv = ConversationHandler(
         REPORT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_report)],
         SOLVE:  [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_solve)],
     },
-    fallbacks=[CommandHandler("cancel", lambda upd, ctx: ctx.bot.send_message(
-        chat_id=upd.effective_chat.id,
-        text="Operation cancelled."
+    fallbacks=[CommandHandler("cancel", lambda u, c: c.bot.send_message(
+        chat_id=u.effective_chat.id, text="Operation cancelled."
     ))],
 )
-
-# 5) Register the handler
 app.add_handler(conv)
 
-# 6) Run polling (sync)
+# 4) Run polling (sync) so Render sees the port open
 if __name__ == "__main__":
-    print("Bot is up and running—send /start in Telegram to test.")
+    port = int(os.environ.get("PORT", 8443))
+    print(f"Starting polling. (Render health-check will see this process bound.)")
     app.run_polling()
