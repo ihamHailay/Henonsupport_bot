@@ -12,28 +12,28 @@ GETSTART_FILE    = 9
 
 async def gs_bank(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['bank'] = update.message.text
-    await update.message.reply_text("Enter your **school name**:")
+    await update.message.reply_text("Enter your school name:")
     return GETSTART_SCHOOL
 
 async def gs_school(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['school'] = update.message.text
-    await update.message.reply_text("Enter your **account number**:")
+    await update.message.reply_text("Enter your account number:")
     return GETSTART_ACCOUNT
 
 async def gs_account(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['account'] = update.message.text
-    await update.message.reply_text("Enter your **school level**:")
+    await update.message.reply_text("Enter your school level:")
     return GETSTART_LEVEL
 
 async def gs_level(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['level'] = update.message.text
-    await update.message.reply_text("Enter your **address**:")
+    await update.message.reply_text("Enter your address:")
     return GETSTART_ADDRESS
 
 async def gs_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['address'] = update.message.text
     await update.message.reply_text(
-        "Almost done—please attach your **Excel file** (as a document)."
+        "Almost done—please attach your Excel file (as a document)."
     )
     return GETSTART_FILE
 
