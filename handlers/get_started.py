@@ -61,5 +61,10 @@ async def gs_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     # 3) Acknowledge the user
-    await update.message.reply_text("✅ Your setup request has been sent to support!")
+   from .utils import nav_back_to_menu
+await update.message.reply_text(
+    "✅ Your setup request has been sent to support!",
+    reply_markup=nav_back_to_menu()
+)
+
     return ConversationHandler.END

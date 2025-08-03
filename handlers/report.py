@@ -15,4 +15,9 @@ async def handle_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Confirm to the user
     await update.message.reply_text("✅ Your issue has been sent to the support team.")
++ from .utils import nav_back_to_menu
++ await update.message.reply_text(
++     "✅ Your issue has been sent to the support team.",
++     reply_markup=nav_back_to_menu()
++ )
     return ConversationHandler.END

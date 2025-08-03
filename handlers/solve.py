@@ -31,8 +31,12 @@ async def handle_solve(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         # Forward any unknown choice to the operator
         await forward_to_operator(update, context)
-        await update.message.reply_text(
-            "I don’t see that issue—connecting you to a human operator."
-        )
+       await update.message.reply_text("✅ Your issue has been sent to the support team.")
++ from .utils import nav_back_to_menu
++ await update.message.reply_text(
++     "✅ Your issue has been sent to the support team.",
++     reply_markup=nav_back_to_menu()
++ )
+
 
     return ConversationHandler.END

@@ -1,5 +1,6 @@
 from telegram import ReplyKeyboardMarkup, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 def language_keyboard() -> ReplyKeyboardMarkup:
     """Keyboard for selecting language."""
@@ -14,6 +15,10 @@ def main_menu_keyboard() -> ReplyKeyboardMarkup:
         [['1', '2', '3'], ['4', '5']],
         one_time_keyboard=True
     )
+def nav_back_to_menu():
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton("🔙 Back to Main Menu", callback_data="nav_main")
+    ]])
 
 async def forward_to_operator(
     update: Update,
