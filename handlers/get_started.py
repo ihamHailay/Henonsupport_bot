@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler, filters
-from .utils import forward_to_operator
+from .utils import forward_to_operator, nav_back_to_menu
 
 # State constants
 GETSTART_BANK    = 4
@@ -60,11 +60,10 @@ async def gs_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         filename=doc.file_name
     )
 
-    # 3) Acknowledge the user
-   from .utils import nav_back_to_menu
-await update.message.reply_text(
-    "✅ Your setup request has been sent to support!",
-    reply_markup=nav_back_to_menu()
-)
+    # 3) Acknowledge the user, with a nav button
+    await update.message.reply_text(
+        "✅ Your setup request has been sent to support!",
+        reply_markup=nav_back_to_menu()
+    )
 
     return ConversationHandler.END
