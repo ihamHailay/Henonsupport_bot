@@ -101,6 +101,7 @@ conv = ConversationHandler(
 
 # Register the conversation handler
 app.add_handler(conv)
+app.add_handler(CallbackQueryHandler(nav_handler, pattern="^nav_main$"))
 
 # Start webhook
 if __name__ == "__main__":
