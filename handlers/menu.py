@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 from .utils import main_menu_keyboard
 from .report import REPORT
 from .solve import SOLVE, COMMON_ISSUES
+from .get_started import GETSTART_BANK  # New
 
 MENU = 1
 
@@ -12,7 +13,8 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "1) Report Issue\n"
         "2) Solve Problem\n"
         "3) See Manual\n"
-        "4) See Video Manual",
+        "4) See Video Manual\n"
+        "5) Get Started with System",
         reply_markup=main_menu_keyboard()
     )
     return MENU
@@ -49,6 +51,11 @@ async def choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return ConversationHandler.END
 
+    if text == '5':
+        # Launch the "Get Started" flow
+        await update.message.reply_text("Enter your **bank name**:")
+        return GETSTART_BANK
+
     # Invalid choice
-    await update.message.reply_text("Please choose 1–4.")
+    await update.message.reply_text("Please choose 1–5.")
     return MENU

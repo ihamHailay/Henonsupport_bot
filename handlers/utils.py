@@ -1,43 +1,52 @@
 from telegram import ReplyKeyboardMarkup, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 
-def language_keyboard():
-    return ReplyKeyboardMarkup([['EN', 'AR']], one_time_keyboard=True)
-
-def main_menu_keyboard():
+def language_keyboard() -> ReplyKeyboardMarkup:
+    """Keyboard for selecting language."""
     return ReplyKeyboardMarkup(
-        [['1', '2'], ['3', '4']], one_time_keyboard=True
+        [['EN', 'AR']],
+        one_time_keyboard=True
     )
 
-async def forward_to_operator(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    operator_ids = context.bot_data.get('OPERATOR_CHAT_ID', "").split(',')
+def main_menu_keyboard() -> ReplyKeyboardMarkup:
+    """Main menu keyboard with five options."""
+    return ReplyKeyboardMarkup(
+        [['1', '2', '3'], ['4', '5']],
+        one_time_keyboard=True
+    )
 
-    # Build optional reply markup for operator
+async def forward_to_operator(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    text: str = None
+) -> None:
+    """
+    Forwards an incoming message or a custom summary text to one or more operators.
+    
+    If `text` is provided, sends that text as a new message (with operator action buttons).
+    Otherwise, forwards the original incoming message (preserving media/type).
+    """
+    user = update.effective_user
+    operator_ids = context.bot_data.get('OPERATOR_CHAT_ID', '').split(',')
+
+    # Optional inline buttons for operator actions
     reply_markup = InlineKeyboardMarkup([
         [InlineKeyboardButton("✅ Mark as Solved", callback_data="solved")],
-        [InlineKeyboardButton("↩️ Reply to User", url=f"https://t.me/{user.username}" if user.username else "")]
+        [InlineKeyboardButton(
+            "↩️ Reply to User",
+            url=f"https://t.me/{user.username}" if user.username else ""
+        )]
     ])
 
     for op_id in operator_ids:
         chat_id = int(op_id.strip())
-
-        # Handle different message types
-        if update.message.text:
+        if text:
+            # Send the custom summary text
             await context.bot.send_message(
                 chat_id=chat_id,
-                text=f"🆕 Message from @{user.username or user.id}:\n\n{update.message.text}",
+                text=text,
                 reply_markup=reply_markup
             )
-
-        elif update.message.voice:
-            await update.message.forward(chat_id=chat_id)
-        elif update.message.photo:
-            await update.message.forward(chat_id=chat_id)
-        elif update.message.document:
-            await update.message.forward(chat_id=chat_id)
         else:
-            await context.bot.send_message(
-                chat_id=chat_id,
-                text=f"Message type not supported from @{user.username or user.id}."
-            )
+            # Forward the original incoming message (any type)
+            await update.message.forward(chat_id=chat_id)
