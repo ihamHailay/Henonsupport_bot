@@ -10,14 +10,13 @@ from handlers.language    import start, chosen, LANG
 from handlers.menu        import main_menu, choice, MENU
 from handlers.report      import REPORT, handle_report
 from handlers.solve       import SOLVE, handle_solve
-# ────────────────────────────────────────────────────────────────
+
 # Added imports for the “Get Started with System” flow
 from handlers.get_started import (
     GETSTART_BANK, GETSTART_SCHOOL, GETSTART_ACCOUNT,
     GETSTART_LEVEL, GETSTART_ADDRESS, GETSTART_FILE,
     gs_bank, gs_school, gs_account, gs_level, gs_address, gs_file
 )
-# ────────────────────────────────────────────────────────────────
 
 # Load environment variables as you already do
 TOKEN       = os.getenv("BOT_TOKEN")
