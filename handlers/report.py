@@ -1,7 +1,6 @@
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, ConversationHandler
 from .utils import forward_to_operator, nav_back_to_menu
-from .menu import MENU  # ✅ Import MENU state
 
 # State constant for ConversationHandler
 REPORT = 2
@@ -21,4 +20,4 @@ async def handle_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=nav_back_to_menu()
     )
 
-    return MENU  # ✅ Keep the conversation active
+    return ConversationHandler.END
