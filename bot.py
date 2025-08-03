@@ -7,20 +7,20 @@ from telegram.ext import (
     CallbackQueryHandler,
     filters,
 )
-from handlers.language    import start, chosen, LANG
-from handlers.menu        import main_menu, choice, MENU, main_menu_keyboard
-from handlers.report      import REPORT, handle_report
-from handlers.solve       import SOLVE, handle_solve
-from handlers.utils       import nav_back_to_menu
+from handlers.language import start, chosen, LANG
+from handlers.menu import main_menu, choice, MENU, main_menu_keyboard
+from handlers.report import REPORT, handle_report
+from handlers.solve import SOLVE, handle_solve
+from handlers.utils import nav_back_to_menu
 
-# Added imports for the “Get Started with System” flow
+# “Get Started with System” flow
 from handlers.get_started import (
     GETSTART_BANK, GETSTART_SCHOOL, GETSTART_ACCOUNT,
     GETSTART_LEVEL, GETSTART_ADDRESS, GETSTART_FILE,
     gs_bank, gs_school, gs_account, gs_level, gs_address, gs_file
 )
 
-# Load environment variables as you already do
+# Load environment variables
 TOKEN       = os.getenv("BOT_TOKEN")
 OP_CHAT     = os.getenv("OPERATOR_CHAT_ID")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
@@ -28,36 +28,11 @@ WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 if not (TOKEN and OP_CHAT and WEBHOOK_URL):
     raise RuntimeError("BOT_TOKEN, OPERATOR_CHAT_ID, and WEBHOOK_URL must be set")
 
-# Build the bot application
+# Build the bot
 app = ApplicationBuilder().token(TOKEN).build()
 app.bot_data["OPERATOR_CHAT_ID"] = OP_CHAT
 
-# Register your ConversationHandler, now including states 4–9
-conv = ConversationHandler(
-    entry_points=[CommandHandler("start", start)],
-    states={
-        LANG:   [MessageHandler(filters.Regex("^(EN|AR)$"), chosen)],
-        # Allow options 1–5 in the main menu
-        MENU:   [MessageHandler(filters.Regex("^[1-5]$"), choice)],
-        REPORT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_report)],
-        SOLVE:  [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_solve)],
-
-        # Get Started with System flow
-        GETSTART_BANK:    [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_bank)],
-        GETSTART_SCHOOL:  [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_school)],
-        GETSTART_ACCOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_account)],
-        GETSTART_LEVEL:   [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_level)],
-        GETSTART_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_address)],
-        GETSTART_FILE:    [MessageHandler(filters.Document.ALL,           gs_file)],
-    },
-    fallbacks=[CommandHandler("cancel", lambda u, c: c.bot.send_message(
-        chat_id=u.effective_chat.id,
-        text="Operation cancelled."
-    ))],
-)
-app.add_handler(conv)
-
-# Navigation “Back to Main Menu” callback
+# Navigation: back to main menu (returns to MENU state)
 async def nav_handler(update, context):
     query = update.callback_query
     await query.answer()
@@ -72,8 +47,62 @@ async def nav_handler(update, context):
     )
     return MENU
 
-app.add_handler(CallbackQueryHandler(nav_handler, pattern="^nav_main$"))
+# Define the conversation handler with nav_handler included in all states
+conv = ConversationHandler(
+    entry_points=[CommandHandler("start", start)],
+    states={
+        LANG: [
+            MessageHandler(filters.Regex("^(EN|AR)$"), chosen),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        MENU: [
+            MessageHandler(filters.Regex("^[1-5]$"), choice),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        REPORT: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_report),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        SOLVE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_solve),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        GETSTART_BANK: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, gs_bank),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        GETSTART_SCHOOL: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, gs_school),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        GETSTART_ACCOUNT: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, gs_account),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        GETSTART_LEVEL: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, gs_level),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        GETSTART_ADDRESS: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, gs_address),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+        GETSTART_FILE: [
+            MessageHandler(filters.Document.ALL, gs_file),
+            CallbackQueryHandler(nav_handler, pattern="^nav_main$")
+        ],
+    },
+    fallbacks=[
+        CommandHandler("cancel", lambda update, context: update.message.reply_text(
+            "Operation cancelled."
+        ))
+    ],
+)
 
+# Register the conversation handler
+app.add_handler(conv)
+
+# Start webhook
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "10000"))
     path = f"/{TOKEN}"
