@@ -17,6 +17,14 @@ from handlers.get_started import (
     GETSTART_LEVEL, GETSTART_ADDRESS, GETSTART_FILE,
     gs_bank, gs_school, gs_account, gs_level, gs_address, gs_file
 )
+
+# … inside states:…
+    GETSTART_BANK:    [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_bank)],
+    GETSTART_SCHOOL:  [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_school)],
+    GETSTART_ACCOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_account)],
+    GETSTART_LEVEL:   [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_level)],
+    GETSTART_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, gs_address)],
+    GETSTART_FILE:    [MessageHandler(filters.Document.ALL,        gs_file)],
 # ────────────────────────────────────────────────────────────────
 
 # Load environment variables as you already do

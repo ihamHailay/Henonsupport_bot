@@ -33,35 +33,33 @@ async def gs_level(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def gs_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['address'] = update.message.text
     await update.message.reply_text(
-        "Great! Now please attach your **Excel file** (as a document)."
+        "Almost done—please attach your **Excel file** (as a document)."
     )
     return GETSTART_FILE
 
 async def gs_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Collect the document
-    doc = update.message.document
-    file_id = doc.file_id
-
-    # Build a summary text
+    # Build summary text from collected fields
+    data = context.user_data
     summary = (
         f"🆕 New system setup request:\n"
-        f"• Bank: {context.user_data['bank']}\n"
-        f"• School: {context.user_data['school']}\n"
-        f"• Account: {context.user_data['account']}\n"
-        f"• Level: {context.user_data['level']}\n"
-        f"• Address: {context.user_data['address']}\n"
+        f"• Bank: {data['bank']}\n"
+        f"• School: {data['school']}\n"
+        f"• Account: {data['account']}\n"
+        f"• Level: {data['level']}\n"
+        f"• Address: {data['address']}\n"
     )
 
-    # Forward summary as text
+    # 1) Send the summary text to operators
     await forward_to_operator(update, context, text=summary)
 
-    # Forward the Excel document itself
+    # 2) Forward the attached Excel document itself
+    doc = update.message.document
     await context.bot.send_document(
         chat_id=int(context.bot_data['OPERATOR_CHAT_ID']),
-        document=file_id,
+        document=doc.file_id,
         filename=doc.file_name
     )
 
-    # Acknowledge user
-    await update.message.reply_text("✅ Your setup request has been sent!")
+    # 3) Acknowledge the user
+    await update.message.reply_text("✅ Your setup request has been sent to support!")
     return ConversationHandler.END
