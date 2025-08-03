@@ -4,12 +4,14 @@ from telegram.ext import (
     CommandHandler,
     MessageHandler,
     ConversationHandler,
+    CallbackQueryHandler,
     filters,
 )
 from handlers.language    import start, chosen, LANG
-from handlers.menu        import main_menu, choice, MENU
+from handlers.menu        import main_menu, choice, MENU, main_menu_keyboard
 from handlers.report      import REPORT, handle_report
 from handlers.solve       import SOLVE, handle_solve
+from handlers.utils       import nav_back_to_menu
 
 # Added imports for the “Get Started with System” flow
 from handlers.get_started import (
@@ -54,6 +56,23 @@ conv = ConversationHandler(
     ))],
 )
 app.add_handler(conv)
+
+# Navigation “Back to Main Menu” callback
+async def nav_handler(update, context):
+    query = update.callback_query
+    await query.answer()
+    await query.message.reply_text(
+        "What issue you want to send to Henua?\n"
+        "1) Report Issue\n"
+        "2) Solve Problem\n"
+        "3) See Manual\n"
+        "4) See Video Manual\n"
+        "5) Get Started with System",
+        reply_markup=main_menu_keyboard()
+    )
+    return MENU
+
+app.add_handler(CallbackQueryHandler(nav_handler, pattern="^nav_main$"))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "10000"))
