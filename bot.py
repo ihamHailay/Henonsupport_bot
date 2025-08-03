@@ -7,13 +7,14 @@ from telegram.ext import (
     CallbackQueryHandler,
     filters,
 )
+
 from handlers.language import start, chosen, LANG
 from handlers.menu import main_menu, choice, MENU, main_menu_keyboard
 from handlers.report import REPORT, handle_report
 from handlers.solve import SOLVE, handle_solve
 from handlers.utils import nav_back_to_menu
 
-# “Get Started with System” flow
+# Get Started with System flow
 from handlers.get_started import (
     GETSTART_BANK, GETSTART_SCHOOL, GETSTART_ACCOUNT,
     GETSTART_LEVEL, GETSTART_ADDRESS, GETSTART_FILE,
@@ -47,7 +48,7 @@ async def nav_handler(update, context):
     )
     return MENU
 
-# Define the conversation handler with nav_handler included in all states
+# Define the conversation handler with all possible states
 conv = ConversationHandler(
     entry_points=[CommandHandler("start", start)],
     states={
@@ -93,14 +94,17 @@ conv = ConversationHandler(
         ],
     },
     fallbacks=[
-        CommandHandler("cancel", lambda update, context: update.message.reply_text(
-            "Operation cancelled."
-        ))
+        CommandHandler("cancel", lambda update, context: update.message.reply_text("Operation cancelled."))
     ],
 )
 
-# Register the conversation handler
+# Register handlers
 app.add_handler(conv)
+
+# Global fallback: menu always works even outside conversation
+app.add_handler(MessageHandler(filters.Regex("^[1-5]$"), choice))
+
+# Fallback nav handler to return to MENU
 app.add_handler(CallbackQueryHandler(nav_handler, pattern="^nav_main$"))
 
 # Start webhook
