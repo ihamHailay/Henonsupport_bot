@@ -2,10 +2,11 @@ from telegram import ReplyKeyboardMarkup, Update, InlineKeyboardMarkup, InlineKe
 from telegram.ext import ContextTypes
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
+
 def language_keyboard() -> ReplyKeyboardMarkup:
     """Keyboard for selecting language."""
     return ReplyKeyboardMarkup(
-        [['EN', 'AR']],
+        [['EN', 'AMH']],
         one_time_keyboard=True
     )
 

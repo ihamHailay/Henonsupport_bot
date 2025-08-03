@@ -41,7 +41,7 @@ async def choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if text == '3':
         await update.message.reply_text(
-            "User manual: https://example.com/manual"
+            "User manual: https://henon-k12-manual.vercel.app"
         )
         return ConversationHandler.END
 
